@@ -23,8 +23,8 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version   = 2023080600;
-$plugin->requires  = 2022112800.00;
+$plugin->version   = 2024011800;
+$plugin->requires  = 2023100902.00; // 4.3.2
 $plugin->component = 'availability_facetoface';
 
-$plugin->dependencies = ['mod_facetoface' => 2021120916];
+$plugin->dependencies = ['mod_facetoface' => 2021120917];
