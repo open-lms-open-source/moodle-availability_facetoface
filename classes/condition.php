@@ -111,14 +111,15 @@ class condition extends \core_availability\condition {
             'now' => time(),
             'approved' => 50, // MDL_F2F_STATUS_APPROVED - do not include facetoface/lib.php here for performance reasons.
         ];
+        $where = [];
 
         if ($effectivefromstart) {
             $datesjoin = "JOIN {facetoface_sessions_dates} fsd ON fsd.sessionid = fs.id AND fsd.timestart < :now AND fsd.timestart > 0";
+            $where[] = "fs.datetimeknown = 1";
         } else {
             $datesjoin = "";
         }
 
-        $where = [];
         if ($facetofaceorsessionid < 0) {
             $params['id'] = -1 * $facetofaceorsessionid;
             $where[] = 'f.id = :id';

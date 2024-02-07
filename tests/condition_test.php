@@ -33,6 +33,8 @@ class condition_test extends \advanced_testcase {
     }
 
     public function test_evaluate_availability(): void {
+        global $DB;
+
         /** @var \mod_facetoface_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
 
@@ -143,6 +145,12 @@ class condition_test extends \advanced_testcase {
         $this->assertFalse(condition::evaluate_availability(-1 * $facetoface2->id, 0, $user5->id, $course1->id));
         $this->assertFalse(condition::evaluate_availability(-1 * $facetoface1->id, 0, $user5->id, $course2->id));
         $this->assertFalse(condition::evaluate_availability(-1 * $facetoface1->id, 1, $user5->id, $course2->id));
+
+        $DB->set_field('facetoface_sessions', 'datetimeknown', 0, ['id' => $session1->id]);
+        $this->assertTrue(condition::evaluate_availability(-1 * $facetoface1->id, 0, $user1->id, $course1->id));
+        $this->assertFalse(condition::evaluate_availability(-1 * $facetoface1->id, 1, $user1->id, $course1->id));
+        $this->assertTrue(condition::evaluate_availability($session1->id, 0, $user1->id, $course1->id));
+        $this->assertFalse(condition::evaluate_availability($session1->id, 1, $user1->id, $course1->id));
     }
 
     public function test_save(): void {
