@@ -33,6 +33,8 @@ class frontend_test extends \advanced_testcase {
     }
 
     public function test_get_facetoface_options(): void {
+        global $DB;
+
         /** @var \mod_facetoface_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
 
@@ -85,6 +87,13 @@ class frontend_test extends \advanced_testcase {
         $this->assertSame("aaa - $date", $options[3]->name);
         $this->assertSame(-1 * $facetoface1->id, $options[4]->id);
         $this->assertSame('bbb - any session', $options[4]->name);
+
+        $cm2 = get_coursemodule_from_instance('facetoface', $facetoface2->id, $course1->id, false, MUST_EXIST);
+        $DB->set_field('course_modules', 'deletioninprogress', 1, ['id' => $cm2->id]);
+        $options = frontend::get_facetoface_options($course1->id);
+        $this->assertCount(1, $options);
+        $this->assertSame(-1 * $facetoface1->id, $options[0]->id);
+        $this->assertSame('bbb - any session', $options[0]->name);
     }
 
     public function test_get_javascript_strings(): void {
@@ -125,6 +134,8 @@ class frontend_test extends \advanced_testcase {
     }
 
     public function test_allow_add(): void {
+        global $DB;
+
         /** @var \mod_facetoface_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
 
@@ -142,5 +153,9 @@ class frontend_test extends \advanced_testcase {
 
         $this->assertTrue($frontend->allow_add($course1));
         $this->assertFalse($frontend->allow_add($course2));
+
+        $cm1 = get_coursemodule_from_instance('facetoface', $facetoface1->id, $course1->id, false, MUST_EXIST);
+        $DB->set_field('course_modules', 'deletioninprogress', 1, ['id' => $cm1->id]);
+        $this->assertFalse($frontend->allow_add($course1));
     }
 }
