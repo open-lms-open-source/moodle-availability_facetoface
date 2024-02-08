@@ -132,6 +132,8 @@ class condition extends \core_availability\condition {
         $sql = "SELECT DISTINCT f.id
                   FROM {facetoface_sessions} fs
                   JOIN {facetoface} f ON f.id = fs.facetoface AND f.course = :courseid
+                  JOIN {course_modules} cm ON cm.instance = f.id AND cm.deletioninprogress = 0
+                  JOIN {modules} md ON md.name = 'facetoface' AND md.id = cm.module
                   JOIN {facetoface_signups} fsu ON fsu.sessionid = fs.id AND fsu.userid = :userid
                   JOIN {facetoface_signups_status} fsus
                        ON fsus.signupid = fsu.id AND fsus.superceded = 0 AND fsus.statuscode >= :approved

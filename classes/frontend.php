@@ -35,10 +35,11 @@ class frontend extends \core_availability\frontend {
         global $DB, $CFG;
         require_once("$CFG->dirroot/mod/facetoface/lib.php");
 
-        $sql = "SELECT m.*, cm.id AS cmid
-                  FROM {course_modules} cm, {modules} md, {facetoface} m
-                 WHERE cm.course = :courseid AND cm.instance = m.id
-                       AND md.name = 'facetoface' AND md.id = cm.module";
+        $sql = "SELECT f.*, cm.id AS cmid
+                  FROM {facetoface} f
+                  JOIN {course_modules} cm ON cm.instance = f.id AND cm.deletioninprogress = 0
+                  JOIN {modules} md ON md.name = 'facetoface' AND md.id = cm.module
+                 WHERE cm.course = :courseid";
         $facetofaces = $DB->get_records_sql($sql, ['courseid' => $courseid]);
         if (!$facetofaces) {
             return [];
@@ -109,6 +110,13 @@ class frontend extends \core_availability\frontend {
     protected function allow_add($course, \cm_info $cm = null, \section_info $section = null): bool {
         global $DB;
 
-        return $DB->record_exists('facetoface', ['course' => $course->id]);
+        $sql = "SELECT 'x'
+                  FROM {facetoface} f
+                  JOIN {course_modules} cm ON cm.instance = f.id AND cm.deletioninprogress = 0
+                  JOIN {modules} md ON md.name = 'facetoface' AND md.id = cm.module
+                 WHERE cm.course = :courseid";
+        $params = ['courseid' => $course->id];
+
+        return $DB->record_exists_sql($sql, $params);
     }
 }

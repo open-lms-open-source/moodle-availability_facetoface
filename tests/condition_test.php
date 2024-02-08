@@ -151,6 +151,14 @@ class condition_test extends \advanced_testcase {
         $this->assertFalse(condition::evaluate_availability(-1 * $facetoface1->id, 1, $user1->id, $course1->id));
         $this->assertTrue(condition::evaluate_availability($session1->id, 0, $user1->id, $course1->id));
         $this->assertFalse(condition::evaluate_availability($session1->id, 1, $user1->id, $course1->id));
+        $DB->set_field('facetoface_sessions', 'datetimeknown', 1, ['id' => $session1->id]);
+
+        $cm1 = get_coursemodule_from_instance('facetoface', $facetoface1->id, $course1->id, false, MUST_EXIST);
+        $DB->set_field('course_modules', 'deletioninprogress', 1, ['id' => $cm1->id]);
+        $this->assertFalse(condition::evaluate_availability(-1 * $facetoface1->id, 0, $user1->id, $course1->id));
+        $this->assertFalse(condition::evaluate_availability(-1 * $facetoface1->id, 1, $user1->id, $course1->id));
+        $this->assertFalse(condition::evaluate_availability($session1->id, 0, $user1->id, $course1->id));
+        $this->assertFalse(condition::evaluate_availability($session1->id, 1, $user1->id, $course1->id));
     }
 
     public function test_save(): void {
