@@ -29,9 +29,10 @@ class frontend extends \core_availability\frontend {
      * Gets all facetoface restriction options for the course.
      *
      * @param int $courseid Course id
+     * @param int|null $exclude usually current facetoface id
      * @return array Array of facetoface restriction options
      */
-    public static function get_facetoface_options(int $courseid): array {
+    public static function get_facetoface_options(int $courseid, ?int $exclude): array {
         global $DB, $CFG;
         require_once("$CFG->dirroot/mod/facetoface/lib.php");
 
@@ -40,7 +41,12 @@ class frontend extends \core_availability\frontend {
                   JOIN {course_modules} cm ON cm.instance = f.id AND cm.deletioninprogress = 0
                   JOIN {modules} md ON md.name = 'facetoface' AND md.id = cm.module
                  WHERE cm.course = :courseid";
-        $facetofaces = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+        $params = ['courseid' => $courseid];
+        if ($exclude) {
+            $params['exclude'] = $exclude;
+            $sql = $sql . ' AND f.id <> :exclude';
+        }
+        $facetofaces = $DB->get_records_sql($sql, $params);
         if (!$facetofaces) {
             return [];
         }
@@ -94,7 +100,11 @@ class frontend extends \core_availability\frontend {
      * @return array Array of parameters for the JavaScript function
      */
     protected function get_javascript_init_params($course, \cm_info $cm = null, \section_info $section = null): array {
-        $options = self::get_facetoface_options($course->id);
+        $exclude = null;
+        if ($cm && $cm->modname === 'facetoface') {
+            $exclude = $cm->instance;
+        }
+        $options = self::get_facetoface_options($course->id, $exclude);
         return [$options];
     }
 
@@ -110,12 +120,21 @@ class frontend extends \core_availability\frontend {
     protected function allow_add($course, \cm_info $cm = null, \section_info $section = null): bool {
         global $DB;
 
+        $exclude = null;
+        if ($cm && $cm->modname === 'facetoface') {
+            $exclude = $cm->instance;
+        }
+
         $sql = "SELECT 'x'
                   FROM {facetoface} f
                   JOIN {course_modules} cm ON cm.instance = f.id AND cm.deletioninprogress = 0
                   JOIN {modules} md ON md.name = 'facetoface' AND md.id = cm.module
                  WHERE cm.course = :courseid";
         $params = ['courseid' => $course->id];
+        if ($exclude) {
+            $params['exclude'] = $exclude;
+            $sql = $sql . ' AND f.id <> :exclude';
+        }
 
         return $DB->record_exists_sql($sql, $params);
     }
