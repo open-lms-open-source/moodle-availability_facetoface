@@ -42,12 +42,15 @@ class frontend_test extends \advanced_testcase {
         $facetoface1 = $generator->create_instance(['course' => $course1->id, 'name' => 'bbb']);
         $course2 = $this->getDataGenerator()->create_course();
 
-        $options = frontend::get_facetoface_options($course1->id);
+        $options = frontend::get_facetoface_options($course1->id, null);
         $this->assertCount(1, $options);
         $this->assertSame(-1 * $facetoface1->id, $options[0]->id);
         $this->assertSame('bbb - any session', $options[0]->name);
 
-        $options = frontend::get_facetoface_options($course2->id);
+        $options = frontend::get_facetoface_options($course1->id, $facetoface1->id);
+        $this->assertCount(0, $options);
+
+        $options = frontend::get_facetoface_options($course2->id, null);
         $this->assertCount(0, $options);
 
         $now = time();
@@ -73,7 +76,7 @@ class frontend_test extends \advanced_testcase {
         $session2 = $generator->create_facetoface_session($facetoface2->id, null, $sessiondates2);
         $session3 = $generator->create_facetoface_session($facetoface2->id);
 
-        $options = frontend::get_facetoface_options($course1->id);
+        $options = frontend::get_facetoface_options($course1->id, null);
         $this->assertCount(5, $options);
         $this->assertSame(-1 * $facetoface2->id, $options[0]->id);
         $this->assertSame('aaa - any session', $options[0]->name);
@@ -88,9 +91,14 @@ class frontend_test extends \advanced_testcase {
         $this->assertSame(-1 * $facetoface1->id, $options[4]->id);
         $this->assertSame('bbb - any session', $options[4]->name);
 
+        $options = frontend::get_facetoface_options($course1->id, $facetoface2->id);
+        $this->assertCount(1, $options);
+        $this->assertSame(-1 * $facetoface1->id, $options[0]->id);
+        $this->assertSame('bbb - any session', $options[0]->name);
+
         $cm2 = get_coursemodule_from_instance('facetoface', $facetoface2->id, $course1->id, false, MUST_EXIST);
         $DB->set_field('course_modules', 'deletioninprogress', 1, ['id' => $cm2->id]);
-        $options = frontend::get_facetoface_options($course1->id);
+        $options = frontend::get_facetoface_options($course1->id, null);
         $this->assertCount(1, $options);
         $this->assertSame(-1 * $facetoface1->id, $options[0]->id);
         $this->assertSame('bbb - any session', $options[0]->name);
@@ -138,10 +146,17 @@ class frontend_test extends \advanced_testcase {
 
         /** @var \mod_facetoface_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
+        /** @var \mod_page_generator $generator */
+        $pagegenerator = $this->getDataGenerator()->get_plugin_generator('mod_page');
 
         $course1 = $this->getDataGenerator()->create_course();
         $facetoface1 = $generator->create_instance(['course' => $course1->id, 'name' => 'bbb']);
+        $page2 = $pagegenerator->create_instance(['course' => $course1->id, 'name' => 'ccc']);
         $course2 = $this->getDataGenerator()->create_course();
+        $cm1 = get_coursemodule_from_instance('facetoface', $facetoface1->id, $course1->id, false, MUST_EXIST);
+        $cminfo1 = $newcm = get_fast_modinfo($course1->id)->get_cm($cm1->id);
+        $cm2 = get_coursemodule_from_instance('page', $page2->id, $course1->id, false, MUST_EXIST);
+        $cminfo2 = $newcm = get_fast_modinfo($course1->id)->get_cm($cm2->id);
 
         $class = new class extends frontend {
             public function allow_add($course, \cm_info $cm = null, \section_info $section = null): bool {
@@ -152,9 +167,10 @@ class frontend_test extends \advanced_testcase {
         $frontend = new $class();
 
         $this->assertTrue($frontend->allow_add($course1));
+        $this->assertFalse($frontend->allow_add($course1, $cminfo1));
+        $this->assertTrue($frontend->allow_add($course1, $cminfo2));
         $this->assertFalse($frontend->allow_add($course2));
 
-        $cm1 = get_coursemodule_from_instance('facetoface', $facetoface1->id, $course1->id, false, MUST_EXIST);
         $DB->set_field('course_modules', 'deletioninprogress', 1, ['id' => $cm1->id]);
         $this->assertFalse($frontend->allow_add($course1));
     }
