@@ -32,6 +32,9 @@ class condition_test extends \advanced_testcase {
         $this->resetAfterTest();
     }
 
+    /**
+     * @covers \availability_facetoface\condition::evaluate_availability
+     */
     public function test_evaluate_availability(): void {
         global $DB;
 
@@ -54,19 +57,31 @@ class condition_test extends \advanced_testcase {
             (object)[
                 'timestart' => $now + 20 * DAYSECS,
                 'timefinish' => $now + 21 * DAYSECS,
-            ]
+            ],
         ];
-        $session1 = $generator->create_facetoface_session($facetoface1->id, null, $sessiondates1);
+        $session1 = $generator->create_session([
+            'facetoface' => $facetoface1->id,
+            'sessiondates' => $sessiondates1,
+        ]);
         $sessiondates2 = [
             (object)[
                 'timestart' => $now + 1 * DAYSECS,
                 'timefinish' => $now + 2 * DAYSECS,
             ],
         ];
-        $session2 = $generator->create_facetoface_session($facetoface1->id, null, $sessiondates2);
-        $session3 = $generator->create_facetoface_session($facetoface1->id);
+        $session2 = $generator->create_session([
+            'facetoface' => $facetoface1->id,
+            'sessiondates' => $sessiondates2,
+        ]);
+        $session3 = $generator->create_session([
+            'facetoface' => $facetoface1->id,
+            'sessiondates' => [],
+        ]);
 
-        $session4 = $generator->create_facetoface_session($facetoface2->id, null, $sessiondates1);
+        $session4 = $generator->create_session([
+            'facetoface' => $facetoface2->id,
+            'sessiondates' => $sessiondates1,
+        ]);
 
         $user1 = $this->getDataGenerator()->create_user();
         facetoface_user_signup($session1, $facetoface1, $course1, '', MDL_F2F_BOTH, MDL_F2F_STATUS_APPROVED, $user1->id, false);
@@ -161,6 +176,9 @@ class condition_test extends \advanced_testcase {
         $this->assertFalse(condition::evaluate_availability($session1->id, 1, $user1->id, $course1->id));
     }
 
+    /**
+     * @covers \availability_facetoface\condition::save
+     */
     public function test_save(): void {
         /** @var \mod_facetoface_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
@@ -181,18 +199,30 @@ class condition_test extends \advanced_testcase {
             (object)[
                 'timestart' => $now + 20 * DAYSECS,
                 'timefinish' => $now + 21 * DAYSECS,
-            ]
+            ],
         ];
-        $session1 = $generator->create_facetoface_session($facetoface1->id, null, $sessiondates1);
+        $session1 = $generator->create_session([
+            'facetoface' => $facetoface1->id,
+            'sessiondates' => $sessiondates1,
+        ]);
         $sessiondates2 = [
             (object)[
                 'timestart' => $now + 1 * DAYSECS,
                 'timefinish' => $now + 2 * DAYSECS,
             ],
         ];
-        $session2 = $generator->create_facetoface_session($facetoface1->id, null, $sessiondates2);
-        $session3 = $generator->create_facetoface_session($facetoface1->id);
-        $session4 = $generator->create_facetoface_session($facetoface2->id, null, $sessiondates1);
+        $session2 = $generator->create_session([
+            'facetoface' => $facetoface1->id,
+            'sessiondates' => $sessiondates2,
+        ]);
+        $session3 = $generator->create_session([
+            'facetoface' => $facetoface1->id,
+            'sessiondates' => [],
+        ]);
+        $session4 = $generator->create_session([
+            'facetoface' => $facetoface2->id,
+            'sessiondates' => $sessiondates1,
+        ]);
 
         $structure = (object)['id' => -1 * $facetoface1->id, 'effectivefromstart' => 1];
         $condition = new condition($structure);
@@ -201,7 +231,7 @@ class condition_test extends \advanced_testcase {
         $this->assertSame([
             'type' => 'facetoface',
             'id' => -1 * $facetoface1->id,
-            'effectivefromstart' => 1
+            'effectivefromstart' => 1,
         ], (array)$data);
 
         $structure = (object)['id' => $session2->id, 'effectivefromstart' => 0];
@@ -211,7 +241,7 @@ class condition_test extends \advanced_testcase {
         $this->assertSame([
             'type' => 'facetoface',
             'id' => (int)$session2->id,
-            'effectivefromstart' => 0
+            'effectivefromstart' => 0,
         ], (array)$data);
     }
 }

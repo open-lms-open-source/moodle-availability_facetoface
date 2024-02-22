@@ -23,8 +23,10 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $plugin->version   = 2024011800;
-$plugin->requires  = 2023100902.00; // 4.3.2
+$plugin->requires  = 2023100900.00; // 4.3
 $plugin->component = 'availability_facetoface';
 
 $plugin->dependencies = ['mod_facetoface' => 2021120917];

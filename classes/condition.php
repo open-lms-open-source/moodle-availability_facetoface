@@ -98,7 +98,8 @@ class condition extends \core_availability\condition {
      * @param int $courseid
      * @return bool
      */
-    public static function evaluate_availability(int $facetofaceorsessionid, int $effectivefromstart, int $userid, int $courseid): bool {
+    public static function evaluate_availability(int $facetofaceorsessionid, int $effectivefromstart,
+                                                 int $userid, int $courseid): bool {
         global $DB;
 
         if ($facetofaceorsessionid == 0) {
@@ -114,7 +115,8 @@ class condition extends \core_availability\condition {
         $where = [];
 
         if ($effectivefromstart) {
-            $datesjoin = "JOIN {facetoface_sessions_dates} fsd ON fsd.sessionid = fs.id AND fsd.timestart < :now AND fsd.timestart > 0";
+            $datesjoin = "JOIN {facetoface_sessions_dates} fsd
+            ON fsd.sessionid = fs.id AND fsd.timestart < :now AND fsd.timestart > 0";
             $where[] = "fs.datetimeknown = 1";
         } else {
             $datesjoin = "";
@@ -242,8 +244,7 @@ class condition extends \core_availability\condition {
             if (!$rec || !$rec->newitemid) {
                 // If we are on the same course (e.g. duplicate) then we can just
                 // use the existing one.
-                if ($DB->record_exists('facetoface',
-                    array('id' => $fid, 'course' => $courseid))) {
+                if ($DB->record_exists('facetoface', ['id' => $fid, 'course' => $courseid])) {
                     return false;
                 }
                 // Otherwise it's a warning.
