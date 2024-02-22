@@ -1,1 +1,1 @@
-# moodle-availability_facetoface
+# Availability restriction by Face-to-face session booking

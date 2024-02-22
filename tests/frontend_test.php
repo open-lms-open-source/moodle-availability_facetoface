@@ -24,7 +24,7 @@ namespace availability_facetoface;
  * @author     Petr Skoda
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @coversDefaultClass \availability_facetoface\condition
+ * @coversDefaultClass \availability_facetoface\frontend
  */
 class frontend_test extends \advanced_testcase {
     protected function setUp(): void {
@@ -32,6 +32,9 @@ class frontend_test extends \advanced_testcase {
         $this->resetAfterTest();
     }
 
+    /**
+     * @covers \availability_facetoface\frontend::get_facetoface_options
+     */
     public function test_get_facetoface_options(): void {
         global $DB;
 
@@ -64,17 +67,26 @@ class frontend_test extends \advanced_testcase {
             (object)[
                 'timestart' => strtotime('+20 days', $now),
                 'timefinish' => strtotime('+21 days', $now),
-            ]
+            ],
         ];
-        $session1 = $generator->create_facetoface_session($facetoface2->id, null, $sessiondates1);
+        $session1 = $generator->create_session([
+            'facetoface' => $facetoface2->id,
+            'sessiondates' => $sessiondates1,
+        ]);
         $sessiondates2 = [
             (object)[
                 'timestart' => $now - DAYSECS,
                 'timefinish' => strtotime('+20 days', $now),
             ],
         ];
-        $session2 = $generator->create_facetoface_session($facetoface2->id, null, $sessiondates2);
-        $session3 = $generator->create_facetoface_session($facetoface2->id);
+        $session2 = $generator->create_session([
+            'facetoface' => $facetoface2->id,
+            'sessiondates' => $sessiondates2,
+        ]);
+        $session3 = $generator->create_session([
+            'facetoface' => $facetoface2->id,
+            'sessiondates' => [],
+        ]);
 
         $options = frontend::get_facetoface_options($course1->id, null);
         $this->assertCount(5, $options);
@@ -104,6 +116,9 @@ class frontend_test extends \advanced_testcase {
         $this->assertSame('bbb - any session', $options[0]->name);
     }
 
+    /**
+     * @covers \availability_facetoface\frontend::get_javascript_strings
+     */
     public function test_get_javascript_strings(): void {
         $class = new class extends frontend {
             public function get_javascript_strings() {
@@ -118,6 +133,9 @@ class frontend_test extends \advanced_testcase {
         }
     }
 
+    /**
+     * @covers \availability_facetoface\frontend::get_javascript_init_params
+     */
     public function test_get_javascript_init_params(): void {
         /** @var \mod_facetoface_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
@@ -141,12 +159,15 @@ class frontend_test extends \advanced_testcase {
         $this->assertCount(1, $data[0]);
     }
 
+    /**
+     * @covers \availability_facetoface\frontend::allow_add
+     */
     public function test_allow_add(): void {
         global $DB;
 
         /** @var \mod_facetoface_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_facetoface');
-        /** @var \mod_page_generator $generator */
+        /** @var \mod_page_generator $pagegenerator */
         $pagegenerator = $this->getDataGenerator()->get_plugin_generator('mod_page');
 
         $course1 = $this->getDataGenerator()->create_course();

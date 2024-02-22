@@ -34,9 +34,21 @@ Feature: availability_facetoface tests
     When the following "activity" exist:
       | activity   | course | name  | idnumber |
       | facetoface | C1     | F2F1  | F2F1     |
-    And the following "mod_facetoface > sessions" exist:
-      | facetoface | timestart            | timefinish           |
-      | F2F1       | ##8 Jan 2028 08:00## | ##8 Jan 2028 12:00## |
+    And I am on the "F2F1" "Activity" page logged in as "teacher1"
+    And I follow "Add a new session"
+    And I set the following fields to these values:
+      | Session date/time known | 1                 |
+      | timestart[0][day]       | 8                 |
+      | timestart[0][month]     | January           |
+      | timestart[0][year]      | 2028              |
+      | timestart[0][hour]      | 08                |
+      | timestart[0][minute]    | 00                |
+      | timefinish[0][day]      | 8                 |
+      | timefinish[0][month]    | January           |
+      | timefinish[0][year]     | 2028              |
+      | timefinish[0][hour]     | 12                |
+      | timefinish[0][minute]   | 00                |
+    And I press "Save changes"
     And I am on the "P1" "page activity editing" page
     And I expand all fieldsets
     And I click on "Add restriction..." "button"

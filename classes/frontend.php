@@ -67,9 +67,11 @@ class frontend extends \core_availability\frontend {
             foreach ($sessions as $session) {
                 if ($session->datetimeknown) {
                     $date = reset($session->sessiondates);
-                    $name = $facetoface->name . ' - ' . userdate($date->timestart, get_string('strftimedatetimeshort', 'core_langconfig'));
+                    $name = $facetoface->name . ' - '
+                        . userdate($date->timestart, get_string('strftimedatetimeshort', 'core_langconfig'));
                 } else {
-                    $name = $facetoface->name . ' ' . get_string('unknowndate', 'mod_facetoface');
+                    $name = $facetoface->name . ' '
+                        . get_string('unknowndate', 'mod_facetoface');
                 }
                 $result[] = (object)[
                     'id' => (int)$session->id,
