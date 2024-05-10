@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024011800;
+$plugin->version   = 2024062400;
 $plugin->requires  = 2023100900.00; // 4.3
 $plugin->component = 'availability_facetoface';
 

@@ -90,7 +90,7 @@ class frontend extends \core_availability\frontend {
      * @return array Array of required string identifiers
      */
     protected function get_javascript_strings() {
-        return ['effectivefromstart'];
+        return ['effectivefromstart', 'includewaitlistedusers'];
     }
 
     /**

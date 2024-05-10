@@ -48,6 +48,11 @@ M.availability_facetoface.form.getNode = function(json) {
         '<input type="checkbox" class="form-check-input mx-1" name="effectivefromstart"/>' +
         '</span></label>';
 
+    // Add "Include waitlisted users" checkbox.
+    html += '<br><label><span class="pr-3">' + M.util.get_string('includewaitlistedusers', 'availability_facetoface') + '</span> ' +
+        '<span class="availability-group">' +
+        '<input type="checkbox" class="form-check-input mx-1" name="includewaitlistedusers"/>' +
+        '</span></label>';
     var node = Y.Node.create('<span class="form-inline">' + html + '</span>');
 
     // Set initial value if specified.
@@ -57,6 +62,9 @@ M.availability_facetoface.form.getNode = function(json) {
     }
     if (json.effectivefromstart !== undefined && json.effectivefromstart === 1) {
         node.one('input[name=effectivefromstart]').set('checked', true);
+    }
+    if (json.includewaitlistedusers !== undefined || json.includewaitlistedusers === 1)  {
+        node.one('input[name=includewaitlistedusers]').set('checked', true);
     }
 
     // Add event handlers (first time only).
@@ -88,6 +96,12 @@ M.availability_facetoface.form.fillValue = function(value, node) {
     } else {
         value.effectivefromstart = 0;
     }
+    if (node.one('input[name=includewaitlistedusers]').get('checked')) {
+        value.includewaitlistedusers = 1;
+    } else {
+        value.includewaitlistedusers = 0;
+    }
+
 };
 
 M.availability_facetoface.form.fillErrors = function(errors, node) {

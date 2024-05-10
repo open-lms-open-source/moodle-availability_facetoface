@@ -17,11 +17,14 @@ Feature: availability_facetoface tests
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
       | student1 | C1     | student        |
+      | student2 | C1     | student        |
     And the following "activities" exist:
       | activity | course | name  |
       | page     | C1     | P1    |
       | page     | C1     | P2    |
       | page     | C1     | P3    |
+      | page     | C1     | P4    |
+      | page     | C1     | P5    |
 
   @javascript
   Scenario: Test availability_facetoface condition
@@ -34,6 +37,7 @@ Feature: availability_facetoface tests
     When the following "activity" exist:
       | activity   | course | name  | idnumber |
       | facetoface | C1     | F2F1  | F2F1     |
+
     And I am on the "F2F1" "Activity" page logged in as "teacher1"
     And I follow "Add a new session"
     And I set the following fields to these values:
@@ -94,3 +98,61 @@ Feature: availability_facetoface tests
     Then I should see "P1" in the "region-main" "region"
     And I should see "P2" in the "region-main" "region"
     And I should not see "P3" in the "region-main" "region"
+
+    When the following "activity" exist:
+      | activity   | course | name  | idnumber |
+      | facetoface | C1     | F2F2  | F2F2     |
+    And I am on the "F2F2" "Activity" page logged in as "teacher1"
+    And I follow "Add a new session"
+    And I set the following fields to these values:
+      | Session date/time known | 1                 |
+      | timestart[0][day]       | 8                 |
+      | timestart[0][month]     | January           |
+      | timestart[0][year]      | 2028              |
+      | timestart[0][hour]      | 08                |
+      | timestart[0][minute]    | 00                |
+      | timefinish[0][day]      | 8                 |
+      | timefinish[0][month]    | January           |
+      | timefinish[0][year]     | 2028              |
+      | timefinish[0][hour]     | 12                |
+      | timefinish[0][minute]   | 00                |
+      | capacity                | 1                 |
+      | allowoverbook           | 1                 |
+    And I press "Save changes"
+    And I am on the "P4" "page activity editing" page
+    And I expand all fieldsets
+    And I click on "Add restriction..." "button"
+
+    When I click on "Face-to-face booking" "button" in the "Add restriction..." "dialogue"
+    And I set the field "Face-to-face booking" to "F2F2 - any session"
+    And I click on ".availability-item .availability-eye img" "css_element"
+    And I set the field "Include waitlisted users" to "1"
+    And I click on "Save and return to course" "button"
+
+    When I am on the "P5" "page activity editing" page
+    And I expand all fieldsets
+    And I click on "Add restriction..." "button"
+
+    When I click on "Face-to-face booking" "button" in the "Add restriction..." "dialogue"
+    And I set the field "Face-to-face booking" to "F2F2 - any session"
+    And I click on ".availability-item .availability-eye img" "css_element"
+    And I click on "Save and return to course" "button"
+
+    When I am on the "Course 1" "course" page logged in as "student1"
+    And I follow "F2F2"
+    And I follow "Sign-up"
+    And I click on "Sign-up" "button"
+
+    When I am on the "Course 1" "course" page logged in as "student2"
+    And I follow "F2F2"
+    And I follow "Sign-up"
+    And I click on "Sign-up" "button"
+    Then I should see "Wait-listed"
+
+    When I am on the "Course 1" "course" page logged in as "student1"
+    Then I should see "P4"
+    And I should see "P5"
+
+    When I am on the "Course 1" "course" page logged in as "student2"
+    Then I should see "P4"
+    And I should not see "P5"

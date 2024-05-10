@@ -31,6 +31,9 @@ class condition extends \core_availability\condition {
     /** @var int affective only after session start, value 0 or 1 */
     protected $effectivefromstart;
 
+    /** @var int include wait listed users, value 0 or 1 */
+    protected $includewaitlistedusers;
+
     /**
      * Constructor.
      *
@@ -39,6 +42,7 @@ class condition extends \core_availability\condition {
     public function __construct($structure) {
         $this->facetofaceorsessionid = (int)$structure->id;
         $this->effectivefromstart = (int)($structure->effectivefromstart ?? 0);
+        $this->includewaitlistedusers = (int)($structure->includewaitlistedusers ?? 0);
     }
 
     /**
@@ -50,6 +54,7 @@ class condition extends \core_availability\condition {
         $result = (object)['type' => 'facetoface'];
         $result->id = $this->facetofaceorsessionid;
         $result->effectivefromstart = $this->effectivefromstart;
+        $result->includewaitlistedusers = $this->includewaitlistedusers;
         return $result;
     }
 
@@ -78,7 +83,7 @@ class condition extends \core_availability\condition {
      */
     public function is_available($not, \core_availability\info $info, $grabthelot, $userid): bool {
         $available = self::evaluate_availability(
-            $this->facetofaceorsessionid, $this->effectivefromstart, $userid, $info->get_course()->id);
+            $this->facetofaceorsessionid, $this->effectivefromstart, $this->includewaitlistedusers, $userid, $info->get_course()->id);
 
         if ($not) {
             $available = !$available;
@@ -94,12 +99,13 @@ class condition extends \core_availability\condition {
      *
      * @param int $facetofaceorsessionid
      * @param int $effectivefromstart
+     * @param int $includewaitlistedusers
      * @param int $userid
      * @param int $courseid
      * @return bool
      */
     public static function evaluate_availability(int $facetofaceorsessionid, int $effectivefromstart,
-                                                 int $userid, int $courseid): bool {
+                                                 int $includewaitlistedusers, int $userid, int $courseid): bool {
         global $DB;
 
         if ($facetofaceorsessionid == 0) {
@@ -111,6 +117,7 @@ class condition extends \core_availability\condition {
             'userid' => $userid,
             'now' => time(),
             'approved' => 50, // MDL_F2F_STATUS_APPROVED - do not include facetoface/lib.php here for performance reasons.
+            'waitlisted' => 60
         ];
         $where = [];
 
@@ -120,6 +127,10 @@ class condition extends \core_availability\condition {
             $where[] = "fs.datetimeknown = 1";
         } else {
             $datesjoin = "";
+        }
+
+        if (!$includewaitlistedusers) {
+            $where[] = "fsus.statuscode != :waitlisted";
         }
 
         if ($facetofaceorsessionid < 0) {
@@ -139,7 +150,7 @@ class condition extends \core_availability\condition {
                   JOIN {facetoface_signups} fsu ON fsu.sessionid = fs.id AND fsu.userid = :userid
                   JOIN {facetoface_signups_status} fsus
                        ON fsus.signupid = fsu.id AND fsus.superceded = 0 AND fsus.statuscode >= :approved
-                  $datesjoin
+                 $datesjoin
                  WHERE $where";
 
         return $DB->record_exists_sql($sql, $params);
@@ -175,6 +186,12 @@ class condition extends \core_availability\condition {
             $effective = '';
         }
 
+        if ($this->includewaitlistedusers) {
+            $includewaitlistedusers = ' ' . get_string('requires_includewaitlistedusers', 'availability_facetoface');
+        } else {
+            $includewaitlistedusers = '';
+        }
+
         if ($facetofaceorsessionid > 0) {
             $id = $facetofaceorsessionid;
             $session = $DB->get_record('facetoface_sessions', ['id' => $id]);
@@ -189,9 +206,9 @@ class condition extends \core_availability\condition {
                         $a .= ' - ' . get_string('unknowndate', 'mod_facetoface');
                     }
                     if ($not) {
-                        return get_string('requires_notsession', 'availability_facetoface', $a) . $effective;
+                        return get_string('requires_notsession', 'availability_facetoface', $a) . $effective . $includewaitlistedusers;
                     } else {
-                        return get_string('requires_session', 'availability_facetoface', $a) . $effective;
+                        return get_string('requires_session', 'availability_facetoface', $a) . $effective . $includewaitlistedusers;
                     }
                 }
             }
@@ -213,7 +230,7 @@ class condition extends \core_availability\condition {
     }
 
     protected function get_debug_string() {
-        return '#' . $this->facetofaceorsessionid . ':' . $this->effectivefromstart;
+        return '#' . $this->facetofaceorsessionid . ':' . $this->effectivefromstart . ':' . $this->includewaitlistedusers;
     }
 
     /**
