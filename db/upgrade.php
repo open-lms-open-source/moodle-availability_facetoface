@@ -26,16 +26,21 @@ function xmldb_availability_facetoface_upgrade($oldversion) {
 
     if ($oldversion < 2024011800) {
 
-        $sql = "SELECT cm.* 
+        $sql = "SELECT cm.id, cm.availability
                   FROM {course_modules} cm
                  WHERE ".$DB->sql_like('availability', '?');
         $records = $DB->get_records_sql($sql, ['%facetoface%']);
         foreach ($records as $record) {
             $data = json_decode($record->availability, true);
+            $modified = false;
             foreach ($data['c'] as &$item) {
                 if (isset($item['type']) && $item['type'] === 'facetoface' && !isset($item['includewaitlistedusers'])) {
                     $item['includewaitlistedusers'] = 1;
+                    $modified = true;
                 }
+            }
+            if (!$modified) {
+                continue;
             }
             $record->availability = json_encode($data);
             $DB->update_record('course_modules', $record);
