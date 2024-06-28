@@ -63,7 +63,7 @@ M.availability_facetoface.form.getNode = function(json) {
     if (json.effectivefromstart !== undefined && json.effectivefromstart === 1) {
         node.one('input[name=effectivefromstart]').set('checked', true);
     }
-    if (json.includewaitlistedusers !== undefined || json.includewaitlistedusers === 1)  {
+    if (json.includewaitlistedusers !== undefined && json.includewaitlistedusers === 1)  {
         node.one('input[name=includewaitlistedusers]').set('checked', true);
     }
 
