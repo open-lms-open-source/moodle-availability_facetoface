@@ -45,6 +45,7 @@ function xmldb_availability_facetoface_upgrade($oldversion) {
             $record->availability = json_encode($data);
             $DB->update_record('course_modules', $record);
         }
+        upgrade_plugin_savepoint(true, 2024011800, 'availability', 'facetoface');
     }
 
     return true;
