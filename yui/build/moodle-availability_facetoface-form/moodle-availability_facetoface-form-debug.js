@@ -33,7 +33,8 @@ M.availability_facetoface.form.initInner = function(facetofaces) {
 
 M.availability_facetoface.form.getNode = function(json) {
     // Create HTML structure.
-    var html = '<label><span class="pr-3">' + M.util.get_string('title', 'availability_facetoface') + '</span> ' +
+    var html = '<label><span class="col-form-label pe-3">' +
+        M.util.get_string('title', 'availability_facetoface') + '</span> ' +
         '<span class="availability-group">' +
         '<select name="id" class="custom-select">' +
         '<option value="choose">' + M.util.get_string('choosedots', 'moodle') + '</option>';
@@ -45,17 +46,19 @@ M.availability_facetoface.form.getNode = function(json) {
     html += '</select></span></label>';
 
     // Add "Effective from start date" checkbox.
-    html += '<br><label><span class="pr-3">' + M.util.get_string('effectivefromstart', 'availability_facetoface') + '</span> ' +
+    html += '<br><label><span class="col-form-label pe-3">' +
+        M.util.get_string('effectivefromstart', 'availability_facetoface') + '</span> ' +
         '<span class="availability-group">' +
         '<input type="checkbox" class="form-check-input mx-1" name="effectivefromstart"/>' +
         '</span></label>';
 
     // Add "Include waitlisted users" checkbox.
-    html += '<br><label><span class="pr-3">' + M.util.get_string('includewaitlistedusers', 'availability_facetoface') + '</span> ' +
+    html += '<br><label><span class="col-form-label pe-3">' +
+        M.util.get_string('includewaitlistedusers', 'availability_facetoface') + '</span> ' +
         '<span class="availability-group">' +
         '<input type="checkbox" class="form-check-input mx-1" name="includewaitlistedusers"/>' +
         '</span></label>';
-    var node = Y.Node.create('<span class="form-inline">' + html + '</span>');
+    var node = Y.Node.create('<span class="d-flex flex-wrap align-items-center">' + html + '</span>');
 
     // Set initial value if specified.
     if (json.id !== undefined &&
@@ -65,7 +68,7 @@ M.availability_facetoface.form.getNode = function(json) {
     if (json.effectivefromstart !== undefined && json.effectivefromstart === 1) {
         node.one('input[name=effectivefromstart]').set('checked', true);
     }
-    if (json.includewaitlistedusers !== undefined && json.includewaitlistedusers === 1)  {
+    if (json.includewaitlistedusers !== undefined && json.includewaitlistedusers === 1) {
         node.one('input[name=includewaitlistedusers]').set('checked', true);
     }
 
